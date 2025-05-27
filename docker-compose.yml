@@ -1,0 +1,71 @@
+services:
+
+  # Spring Boot
+  app:
+    container_name: aitemplate-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      - redis
+      - elasticsearch
+    networks:
+      - ait-network
+
+  # Redis
+  redis:
+    image: redis:7
+    container_name: aitemplate-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ait-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    container_name: aitemplate-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    networks:
+      - ait-network
+
+  # Mysql
+  mysql:
+    image: mysql:8.0
+    container_name: aitemplate-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: aitemplate
+      MYSQL_DATABASE: aitemplate_db
+    ports:
+      - "3306:3306"
+    networks:
+      - ait-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+
+networks:
+  ait-network:
+    driver: bridge
