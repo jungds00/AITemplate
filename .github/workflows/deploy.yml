@@ -40,5 +40,13 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd ~/app
+
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
+            echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+
             docker compose down || true
             docker compose up -d --build
