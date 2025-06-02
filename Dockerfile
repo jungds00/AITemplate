@@ -2,6 +2,7 @@ FROM openjdk:17-jdk-slim
 
 COPY build/libs/AITemplate-1.0.0.jar app.jar
 COPY wait-for-it.sh /wait-for-it.sh
+COPY src/main/resources/service-account.json /app/service-account.json
 RUN chmod +x /wait-for-it.sh
 
 

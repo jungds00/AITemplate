@@ -1,6 +1,5 @@
 services:
 
-  # Spring Boot
   app:
     container_name: aitemplate-app
     build:
@@ -18,12 +17,12 @@ services:
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     depends_on:
+      - mysql
       - redis
       - elasticsearch
     networks:
       - ait-network
 
-  # Redis
   redis:
     image: redis:7
     container_name: aitemplate-redis
@@ -32,7 +31,6 @@ services:
     networks:
       - ait-network
 
-  # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
     container_name: aitemplate-elasticsearch
@@ -47,7 +45,6 @@ services:
     networks:
       - ait-network
 
-  # Mysql
   mysql:
     image: mysql:8.0
     container_name: aitemplate-mysql
@@ -64,7 +61,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
 
 networks:
   ait-network:
