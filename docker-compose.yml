@@ -1,66 +1,71 @@
+version: '3.8'
+
 services:
-
-  app:
-    container_name: aitemplate-app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    environment:
-      - JWT_SECRET=${JWT_SECRET}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
-      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-    depends_on:
-      - mysql
-      - redis
-      - elasticsearch
-    networks:
-      - ait-network
-
-  redis:
-    image: redis:7
-    container_name: aitemplate-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - ait-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
-    container_name: aitemplate-elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - xpack.security.http.ssl.enabled=false
-    networks:
-      - ait-network
-
   mysql:
     image: mysql:8.0
     container_name: aitemplate-mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: aitemplate
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: aitemplate_db
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     networks:
       - ait-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    container_name: aitemplate-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ait-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    container_name: aitemplate-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    networks:
+      - ait-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  app:
+    build:
+      context: .
+    container_name: aitemplate-app
+    ports:
+      - "8080:8080"
+    networks:
+      - ait-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: always
 
 networks:
   ait-network:

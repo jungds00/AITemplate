@@ -47,7 +47,7 @@ jobs:
             echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
             echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
             echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            
+
             mkdir -p src/main/resources
             echo '${{ secrets.GOOGLE_CREDENTIALS }}' > src/main/resources/service-account.json
 
