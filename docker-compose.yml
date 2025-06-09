@@ -63,6 +63,8 @@ services:
         condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+    env_file:
+      - .env
     restart: always
 
 networks:
