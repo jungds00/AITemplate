@@ -27,7 +27,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = (String) oAuth2User.getAttributes().get("email");
 
-        User user = userRepository.findByUserId(email).orElseThrow();
+        User user = userRepository.findByEmail(email).orElseThrow();
         String token = jwtTokenProvider.generateToken(user.getUserId());
 
         response.sendRedirect("http://localhost:8080/oauth2/success?token=" + token);

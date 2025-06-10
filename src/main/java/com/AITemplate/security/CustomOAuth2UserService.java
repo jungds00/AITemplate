@@ -31,7 +31,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // DB에 없으면 저장
-        userRepository.findByUserId(email)
+        userRepository.findByEmail(email)
                 .orElseGet(() -> userRepository.save(
                         User.builder()
                                 .userId(email)

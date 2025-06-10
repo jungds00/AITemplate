@@ -14,7 +14,7 @@ public class PortfolioSearchService {
     private final PortfolioSearchQueryRepository searchRepository;
 
     public PortfolioSearchService(
-            @Qualifier("portfolioSearchQueryRepositoryImpl") // Qualifire 쓸때는 @RequiredArgsConstructor대신 생성자주입 필요
+            @Qualifier("portfolioSearchQueryRepositoryImpl") // Qualifier 쓸때는 @RequiredArgsConstructor대신 생성자주입 필요
             PortfolioSearchQueryRepository searchRepository
     ) {
         this.searchRepository = searchRepository;
