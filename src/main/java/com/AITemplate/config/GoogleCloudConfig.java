@@ -13,6 +13,13 @@ public class GoogleCloudConfig {
 
     @Bean
     public GoogleCredentials googleCredentials() throws IOException {
-        return ServiceAccountCredentials.fromStream(new FileInputStream("src/main/resources/service-account.json"));
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        if (credentialsPath == null || credentialsPath.isEmpty()) {
+            credentialsPath = "/app/service-account.json";
+        }
+
+        try (FileInputStream inputStream = new FileInputStream(credentialsPath)) {
+            return ServiceAccountCredentials.fromStream(inputStream);
+        }
     }
 }
