@@ -29,8 +29,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "."
+          source: "build/libs/AITemplate-1.0.0.jar"
           target: "/home/ubuntu/app"
+          debug: true
 
       - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
