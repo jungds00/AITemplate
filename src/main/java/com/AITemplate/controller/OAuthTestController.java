@@ -21,7 +21,7 @@ public class OAuthTestController {
             http://aitemplate.p-e.kr:8080/oauth2/success?token=발급된토큰
         """
     )
-    @GetMapping("/oauth/success")
+    @GetMapping("/oauth2/success")
     public ResponseEntity<String> displayToken(@RequestParam String token) {
         String message = """
         로그인이 완료되었습니다.
