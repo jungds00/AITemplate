@@ -27,7 +27,4 @@ public class RegisterRequestDto {
     @NotBlank(message = "비밀번호는 필수 입력 항목입니다.")
     private String password;
 
-    @Schema(description = "가입 경로 (local 또는 google)", example = "local")
-    @NotBlank(message = "가입 경로는 필수 입력 항목입니다.")
-    private String provider;
 }

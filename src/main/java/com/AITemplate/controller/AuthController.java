@@ -30,7 +30,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Operation(summary = "회원가입", description = "userId, 이름, 이메일, 비밀번호, 가입 경로를 입력받아 회원을 등록합니다.")
+    @Operation(summary = "회원가입", description = "userId, 이름, 이메일, 비밀번호를 입력받아 회원을 등록합니다.")
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<String> register(@Valid @ModelAttribute RegisterRequestDto request) {
         String userId = request.getUserId();
@@ -47,7 +47,7 @@ public class AuthController {
                 .username(request.getUsername())
                 .email(email)
                 .password(encodedPassword)
-                .provider(request.getProvider())
+                .provider("local")
                 .build();
 
         userRepository.save(user);
