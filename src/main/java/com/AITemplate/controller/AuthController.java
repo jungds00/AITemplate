@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,8 +31,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "회원가입", description = "userId, 이름, 이메일, 비밀번호, 가입 경로를 입력받아 회원을 등록합니다.")
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<String> register(@Valid @ModelAttribute RegisterRequestDto request) {
         String userId = request.getUserId();
         String email = request.getEmail();
 
@@ -54,8 +55,8 @@ public class AuthController {
     }
 
     @Operation(summary = "로그인", description = "userId와 password를 통해 JWT 토큰을 발급받습니다.")
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequestDto request) {
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Map<String, String>> login(@Valid @ModelAttribute LoginRequestDto request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUserId(), request.getPassword())
         );
