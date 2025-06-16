@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class OAuthTestController {
 
     @Operation(
-            summary = "OAuth 로그인 성공 후 리디렉션",
+            summary = "OAuth 로그인 성공 후 토큰확인",
             description = """
-            Google OAuth2 로그인 후 발급된 JWT 토큰을 확인할 수 있는 엔드포인트입니다.
-            브라우저에서 접속하면 토큰이 텍스트형태로 출력되며,
-            Swagger에서는 결과값보기가 제한될 수 있습니다.
+            Google OAuth2 로그인 성공 시 전달되는 JWT 토큰을 확인할 수 있는 엔드포인트입니다.
+            토큰은 URL 파라미터로 제공되며 브라우저에서는 텍스트 형태로 출력됩니다.
+            아래 예시 주소에서 token 값을 복사해 API 호출 시 Authorization 헤더에 적용시켜주세요.
             
             http://aitemplate.p-e.kr:8080/oauth2/success?token=발급된토큰
         """
     )
-    @GetMapping("/oauth-success")
-    public ResponseEntity<String> handleOauthRedirect(@RequestParam String token) {
+    @GetMapping("/oauth/success")
+    public ResponseEntity<String> displayToken(@RequestParam String token) {
         String message = """
         로그인이 완료되었습니다.
         아래의 JWT 토큰은 인증이 필요한 API 호출시 사용됩니다.
