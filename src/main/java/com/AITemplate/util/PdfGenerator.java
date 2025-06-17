@@ -54,7 +54,66 @@ public class PdfGenerator {
             }
         }
     }
+    public static void generatePortfolioPdf(Portfolio portfolio, OutputStream outputStream) throws IOException {
+        String clean = cleanText(portfolio.getContent());
+        List<String> wrappedLines = wrapText(clean);
 
+        try (PDDocument document = new PDDocument()) {
+            InputStream fontStream = PdfGenerator.class.getResourceAsStream("/fonts/NotoSansKR-Regular.ttf");
+            if (fontStream == null) throw new IOException("폰트 파일을 찾을 수 없습니다.");
+            PDType0Font font = PDType0Font.load(document, fontStream);
+
+            int totalLines = wrappedLines.size();
+            int startIndex = 0;
+
+            while (startIndex < totalLines) {
+                PDPage page = new PDPage();
+                document.addPage(page);
+                PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+                float textStartY = MARGIN_TOP;
+
+                contentStream.beginText();
+                contentStream.setFont(font, FONT_SIZE);
+                contentStream.setLeading(LINE_HEIGHT);
+                contentStream.newLineAtOffset(MARGIN_LEFT, textStartY);
+
+                int endIndex = Math.min(startIndex + MAX_LINES_PER_PAGE, totalLines);
+                for (int i = startIndex; i < endIndex; i++) {
+                    contentStream.showText(wrappedLines.get(i));
+                    contentStream.newLine();
+                }
+
+                contentStream.endText();
+                contentStream.close();
+
+                startIndex = endIndex;
+            }
+
+            if (portfolio.getImageUrl() != null && !portfolio.getImageUrl().isBlank()) {
+                PDPage page = new PDPage();
+                document.addPage(page);
+                try (PDPageContentStream contentStream = new PDPageContentStream(document, page);
+                     InputStream imageStream = openImageStreamFromUrl(portfolio.getImageUrl())) {
+                    PDImageXObject image = PDImageXObject.createFromByteArray(document, imageStream.readAllBytes(), "image");
+
+                    float maxImageWidth = USABLE_WIDTH;
+                    float scale = maxImageWidth / image.getWidth();
+                    float imageWidth = image.getWidth() * scale;
+                    float imageHeight = image.getHeight() * scale;
+
+                    float x = MARGIN_LEFT;
+                    float y = PDRectangle.LETTER.getHeight() - imageHeight - 80f;
+
+                    contentStream.drawImage(image, x, y, imageWidth, imageHeight);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            document.save(outputStream);
+        }
+    }
     private static void writePdfPart(Portfolio portfolio, List<String> lines, OutputStream outputStream, boolean includeImage) throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();

@@ -148,10 +148,10 @@ public class PortfolioService {
 
     public String uploadPortfolioPdf(Portfolio portfolio) {
         try (ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream()) {
-            PdfGenerator.generatePortfolioPdfZip(portfolio, pdfOutputStream);
+            PdfGenerator.generatePortfolioPdf(portfolio, pdfOutputStream);
             byte[] pdfBytes = pdfOutputStream.toByteArray();
 
-            String fileName = "portfolio_" + portfolio.getId() + ".zip";
+            String fileName = "portfolio_" + portfolio.getId() + ".pdf";
             return s3Uploader.upload(fileName, pdfBytes);
         } catch (IOException e) {
             throw new RuntimeException("PDF 업로드 실패", e);
