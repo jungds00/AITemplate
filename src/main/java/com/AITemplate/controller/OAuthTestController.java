@@ -16,9 +16,9 @@ public class OAuthTestController {
             description = """
             Google OAuth2 로그인 성공 시 전달되는 JWT 토큰을 확인할 수 있는 엔드포인트입니다.
             토큰은 URL 파라미터로 제공되며 브라우저에서는 텍스트 형태로 출력됩니다.
-            아래 예시 주소에서 token 값을 복사해 API 호출 시 Authorization 헤더에 적용시켜주세요.
+            아래 예시 주소에서 로그인 하여 나온 토큰을 Authorization에 적용시켜주세요.
             
-            http://aitemplate.p-e.kr:8080/oauth2/success?token=발급된토큰
+            http://aitemplate.p-e.kr:8080/oauth2/authorization/google
         """
     )
     @GetMapping("/oauth2/success")
