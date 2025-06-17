@@ -42,6 +42,7 @@ public class PdfGenerator {
             int startIndex = 0;
 
             PDPage lastPage = null;
+            int lastPageLineCount = 0;
 
             while (startIndex < totalLines) {
                 PDPage page = new PDPage();
@@ -55,6 +56,8 @@ public class PdfGenerator {
                 contentStream.newLineAtOffset(MARGIN_LEFT, MARGIN_TOP);
 
                 int endIndex = Math.min(startIndex + MAX_LINES_PER_PAGE, totalLines);
+                lastPageLineCount = endIndex - startIndex;
+
                 for (int i = startIndex; i < endIndex; i++) {
                     contentStream.showText(wrappedLines.get(i));
                     contentStream.newLine();
@@ -66,9 +69,7 @@ public class PdfGenerator {
             }
 
             if (portfolio.getImageUrl() != null && !portfolio.getImageUrl().isBlank()) {
-                try (PDPageContentStream imageStream = new PDPageContentStream(document, lastPage, PDPageContentStream.AppendMode.APPEND, true, true);
-                     InputStream imageInput = openImageStreamFromUrl(portfolio.getImageUrl())) {
-
+                try (InputStream imageInput = openImageStreamFromUrl(portfolio.getImageUrl())) {
                     PDImageXObject image = PDImageXObject.createFromByteArray(document, imageInput.readAllBytes(), "image");
 
                     float maxImageWidth = USABLE_WIDTH;
@@ -76,21 +77,27 @@ public class PdfGenerator {
                     float imageWidth = image.getWidth() * scale;
                     float imageHeight = image.getHeight() * scale;
 
-                    float x = MARGIN_LEFT;
-                    float y = 50f;
+                    // 마지막 페이지 기준 남은 공간 계산
+                    float usedTextHeight = lastPageLineCount * LINE_HEIGHT;
+                    float remainingSpace = MARGIN_TOP - usedTextHeight - 30f; // 30f 여유
 
-                    if (imageHeight > (MARGIN_TOP - 50f)) {
-                        PDPage newPage = new PDPage();
-                        document.addPage(newPage);
-                        try (PDPageContentStream newImageStream = new PDPageContentStream(document, newPage)) {
-                            float y2 = PDRectangle.LETTER.getHeight() - imageHeight - 80f;
-                            newImageStream.drawImage(image, MARGIN_LEFT, y2, imageWidth, imageHeight);
+                    if (imageHeight > remainingSpace) {
+                        // 공간 부족 -> 새 페이지에 이미지 삽입
+                        PDPage imagePage = new PDPage();
+                        document.addPage(imagePage);
+                        try (PDPageContentStream newImageStream = new PDPageContentStream(document, imagePage)) {
+                            float y = PDRectangle.LETTER.getHeight() - imageHeight - 80f;
+                            newImageStream.drawImage(image, MARGIN_LEFT, y, imageWidth, imageHeight);
                         }
                     } else {
-                        imageStream.drawImage(image, x, y, imageWidth, imageHeight);
+                        // 공간 충분 -> 마지막 페이지에 이미지 삽입
+                        try (PDPageContentStream imageStream = new PDPageContentStream(document, lastPage, PDPageContentStream.AppendMode.APPEND, true, true)) {
+                            float y = 50f;
+                            imageStream.drawImage(image, MARGIN_LEFT, y, imageWidth, imageHeight);
+                        }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    e.printStackTrace(); // 이미지 로딩 실패는 무시
                 }
             }
 
@@ -105,8 +112,8 @@ public class PdfGenerator {
 
     private static String cleanText(String input) {
         if (input == null) return "";
-        String noEmoji = emojiPattern.matcher(input).replaceAll("");
-        return noEmoji.replace("*", ""); // 필요 시 제거
+        String noEmoji = emojiPattern.matcher(input).replaceAll("");  // 이모지 제거
+        return noEmoji.replace("*", ""); // 필요시 * 제거
     }
 
     private static List<String> wrapText(String content) {
